@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
   const [todos, setTodos] = useState(new Map()); // text: date added
   const [dones, setDones] = useState(new Map()); // text: date completed
+
+  useEffect(() => {}, [todos, dones])
 
   function addHabit(e, habit) {    
     e.preventDefault();
@@ -28,7 +30,9 @@ function App() {
       setDones(updatedDones);
     } else {
       // move from done to todos
-      handleDelete(habit);
+      const updatedDones = new Map(dones);
+      updatedDones.delete(habit);
+      setDones(updatedDones);
 
       const updatedTodos = new Map(todos);
       updatedTodos.set(habit, Date.now());
@@ -36,10 +40,18 @@ function App() {
     }
   }
 
-  function handleDelete(habit) {
+  function handleDelete(e, habit) {
+    e.preventDefault();
+
     const updatedDones = new Map(dones);
     updatedDones.delete(habit);
     setDones(updatedDones);
+  }
+
+  function handleDeleteAll(e) {
+    e.preventDefault();
+
+    setDones(new Map());
   }
 
   return (
@@ -47,7 +59,7 @@ function App() {
       <h1>Track your Habits!</h1>
       <p>Add a habit: </p>
       <form onSubmit={(e) => addHabit(e, document.getElementById("habit").value)}>
-        <input type="text" id="habit" name="new-habit" size="20"></input>
+        <input type="text" id="habit" name="new-habit" size="20" key={habit}></input>
         <input type="submit" name="submit" value="Add"></input>
       </form>
 
@@ -61,15 +73,13 @@ function App() {
       )) }
 
       <p>Completed:</p>
+      <button onClick={(e) => handleDeleteAll(e)}>Delete All Completed</button>
       { dones.size !== 0 && Array.from(dones.keys()).map(habit => (
         <form>
           <input type="checkbox" id="habit-checkbox" name="habits" key={habit} checked
-            onClick={() => {
-              return handleCheckboxClick(false, habit)} 
-            }
-          />
+            onClick={() => handleCheckboxClick(false, habit)} />
           <label for="habits">{habit}</label>
-          <button onClick={() => handleDelete(habit)}>Delete?</button>
+          <button onClick={(e) => handleDelete(e, habit)}>Delete?</button>
         </form>
       )) }
     </>
