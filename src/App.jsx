@@ -54,16 +54,27 @@ function App() {
     setDones(new Map());
   }
 
+  function handleCompleteAll(e) {
+    e.preventDefault();
+
+    const updatedDones = new Map(dones);
+    Array.from(todos.keys()).forEach((habit) => updatedDones.set(habit, Date.now()))
+
+    setDones(updatedDones);
+    setTodos(new Map());
+  }
+
   return (
     <>
       <h1>Track your Habits!</h1>
       <p>Add a habit: </p>
       <form onSubmit={(e) => addHabit(e, document.getElementById("habit").value)}>
-        <input type="text" id="habit" name="new-habit" size="20" key={habit}></input>
+        <input type="text" id="habit" name="new-habit" size="20" key={Math.random()}></input>
         <input type="submit" name="submit" value="Add"></input>
       </form>
 
       <p>To Do:</p>
+      <button onClick={(e) => handleCompleteAll(e)}>Mark All Habits as Completed</button>
       { todos.size !== 0 && Array.from(todos.keys()).map(habit => (
         <form>
           <input type="checkbox" id="habit-checkbox" name="habits" key={habit} 
