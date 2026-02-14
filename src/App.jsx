@@ -28,14 +28,18 @@ function App() {
       setDones(updatedDones);
     } else {
       // move from done to todos
-      const updatedDones = new Map(dones);
-      updatedDones.delete(habit);
-      setDones(updatedDones);
+      handleDelete(habit);
 
       const updatedTodos = new Map(todos);
       updatedTodos.set(habit, Date.now());
       setTodos(updatedTodos);
     }
+  }
+
+  function handleDelete(habit) {
+    const updatedDones = new Map(dones);
+    updatedDones.delete(habit);
+    setDones(updatedDones);
   }
 
   return (
@@ -65,6 +69,7 @@ function App() {
             }
           />
           <label for="habits">{habit}</label>
+          <button onClick={() => handleDelete(habit)}>Delete?</button>
         </form>
       )) }
     </>
