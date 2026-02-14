@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Checkbox from './Checkbox';
 import './App.css'
 
 function App() {
@@ -17,6 +16,28 @@ function App() {
       setTodos(updated);
   }
 
+  function handleCheckboxClick(isChecked, habit) {
+    if (isChecked) {
+      // move from todos to done
+      const updatedTodos = new Map(todos);
+      updatedTodos.delete(habit);
+      setTodos(updatedTodos);
+
+      const updatedDones = new Map(dones);
+      updatedDones.set(habit, Date.now());
+      setDones(updatedDones);
+    } else {
+      // move from done to todos
+      const updatedDones = new Map(dones);
+      updatedDones.delete(habit);
+      setDones(updatedDones);
+
+      const updatedTodos = new Map(todos);
+      updatedTodos.set(habit, Date.now());
+      setTodos(updatedTodos);
+    }
+  }
+
   return (
     <>
       <h1>Track your Habits!</h1>
@@ -27,9 +48,25 @@ function App() {
       </form>
 
       <p>To Do:</p>
-      { todos.size !== 0 && Array.from(todos.keys()).map(habit => <Checkbox text={habit} />) }
-      { dones.size !== 0 && todos.map(habit => <Checkbox text={habit} />) }
+      { todos.size !== 0 && Array.from(todos.keys()).map(habit => (
+        <form>
+          <input type="checkbox" id="habit-checkbox" name="habits" key={habit} 
+            onClick={() => handleCheckboxClick(true, habit)} />
+          <label for="habits">{habit}</label>
+        </form>
+      )) }
 
+      <p>Completed:</p>
+      { dones.size !== 0 && Array.from(dones.keys()).map(habit => (
+        <form>
+          <input type="checkbox" id="habit-checkbox" name="habits" key={habit} checked
+            onClick={() => {
+              return handleCheckboxClick(false, habit)} 
+            }
+          />
+          <label for="habits">{habit}</label>
+        </form>
+      )) }
     </>
   )
 }
