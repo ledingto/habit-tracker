@@ -2,8 +2,18 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [habits, setHabits] = useState([]) // [ { name: '', done: true/false }]
+  const [habits, setHabits] = useState([]);
   const [habitInput, setHabitInput] = useState("");
+
+  // Factory
+  function _createHabit(name) {
+    return {
+      name,
+      done: false,
+      createdAt: Date.now(),
+      completedAt: null,
+    }
+  }
 
   function addHabit(e, newHabit) {
     e.preventDefault();
@@ -16,7 +26,7 @@ function App() {
         console.log("You already have this habit!")
         return [...prev];
       }
-      return [...prev, {name: sanitizedInput, done: false}]
+      return [...prev, _createHabit(sanitizedInput)]
     });
 
     setHabitInput("");
