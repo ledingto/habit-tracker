@@ -1,97 +1,85 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [todos, setTodos] = useState(new Map()); // text: date added
-  const [dones, setDones] = useState(new Map()); // text: date completed
+  const [habits, setHabits] = useState([]) // [ { name: '', done: true/false }]
   const [habitInput, setHabitInput] = useState("");
 
-  useEffect(() => {}, [todos, dones])
-
-  function addHabit(e, habit) {    
+  function addHabit(e, newHabit) {
     e.preventDefault();
 
-    const updated = new Map(todos);
-    updated.set(habit, Date.now());
+    if (newHabit.length === 0) return;
+    const sanitizedInput = newHabit.trim().toLowerCase();
 
-    todos.has(habit) ? 
-      console.log("You already have this habit!") :
-      setTodos(updated);
+    setHabits((prev) => {
+      if (prev.filter(h => h.name === sanitizedInput).length) {
+        console.log("You already have this habit!")
+        return [...prev];
+      }
+      return [...prev, {name: sanitizedInput, done: false}]
+    });
+
+    setHabitInput("");
   }
 
-  function handleCheckboxClick(isChecked, habit) {
-    if (isChecked) {
-      // move from todos to done
-      const updatedTodos = new Map(todos);
-      updatedTodos.delete(habit);
-      setTodos(updatedTodos);
-
-      const updatedDones = new Map(dones);
-      updatedDones.set(habit, Date.now());
-      setDones(updatedDones);
-    } else {
-      // move from done to todos
-      const updatedDones = new Map(dones);
-      updatedDones.delete(habit);
-      setDones(updatedDones);
-
-      const updatedTodos = new Map(todos);
-      updatedTodos.set(habit, Date.now());
-      setTodos(updatedTodos);
-    }
+  function toggleHabit(name) {
+    setHabits((prev) => prev.map(h => h.name === name ? { ...h, done: !h.done } : h ))
   }
 
-  function handleDelete(e, habit) {
-    e.preventDefault();
-
-    const updatedDones = new Map(dones);
-    updatedDones.delete(habit);
-    setDones(updatedDones);
+  function deleteHabit(name) {
+    setHabits((prev) => prev.filter(h => h.name !== name));
   }
 
-  function handleDeleteAll(e) {
-    e.preventDefault();
-
-    setDones(new Map());
+  function deleteAllDone() {
+    setHabits((prev) => prev.filter(h => !h.done));
   }
 
-  function handleCompleteAll(e) {
-    e.preventDefault();
-
-    const updatedDones = new Map(dones);
-    Array.from(todos.keys()).forEach((habit) => updatedDones.set(habit, Date.now()))
-
-    setDones(updatedDones);
-    setTodos(new Map());
+  function completeAllTodo() {
+    setHabits((prev) => prev.map(h => ({ ...h, done: true})));
   }
+
+  const todos = habits.filter(habit => !habit.done);
+  const dones = habits.filter(habit => habit.done);
 
   return (
     <>
       <h1>Track your Habits!</h1>
-      <p>Add a habit: </p>
       <form onSubmit={(e) => addHabit(e, habitInput)}>
-        <input type="text" id="habit" name="new-habit" size="20" key="new-habit" onChange={(e) => setHabitInput(e.target.value)}></input>
-        <input type="submit" name="submit" value="Add"></input>
+        <label htmlFor="add-habit">Add a habit: </label>
+        <input type="text" id="add-habit" value={habitInput} onChange={(e) => setHabitInput(e.target.value)}></input>
+        <input type="submit" disabled={!habitInput.length} />
       </form>
 
-      <p>To Do:</p>
-      <button onClick={(e) => handleCompleteAll(e)}>Mark All Habits as Completed</button>
-      { todos.size !== 0 && Array.from(todos.keys()).map(habit => (
-        <form key={habit}>
-          <input type="checkbox" name="habits" onClick={() => handleCheckboxClick(true, habit)} />
-          <label htmlFor="habits">{habit}</label>
-        </form>
-      )) }
+      <h2>To Do:</h2>
+      <button onClick={() => completeAllTodo()} disabled={!todos.length}>Complete All To Dos</button>
+      <ul>
+        { todos.map(habit => {
+          return (
+            <li key={`${habit.name}`}>
+              <label>
+                <input type="checkbox" checked={habit.done} onChange={() => toggleHabit(habit.name)}/>
+                {habit.name}
+              </label>
+            </li>
+          )
+        })}
+      </ul>
 
-      <p>Completed:</p>
-      <button onClick={(e) => handleDeleteAll(e)}>Delete All Completed</button>
-      { dones.size !== 0 && Array.from(dones.keys()).map(habit => (
-        <form key={habit}>
-          <input type="checkbox" name="habits" defaultChecked onClick={() => handleCheckboxClick(false, habit)} />
-          <label htmlFor="habits">{habit}</label>
-          <button onClick={(e) => handleDelete(e, habit)}>Delete?</button>
-        </form>
-      )) }
+      <h2>Done:</h2>
+      <button onClick={() => deleteAllDone()} disabled={!dones.length}>Delete All Completed</button>
+      <ul>
+        { dones.map(habit => {
+          return (
+            <li key={`${habit.name}`}>
+              <label>
+                <input type="checkbox" checked={habit.done} onChange={() => toggleHabit(habit.name)}/>
+                {habit.name}
+              </label>
+              <button onClick={() => deleteHabit(habit.name)}>Delete</button>
+            </li>
+          )
+        })}
+      </ul>
     </>
   )
 }
