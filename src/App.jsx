@@ -44,8 +44,22 @@ function App() {
     }
   }
 
-  function toggleHabit(id) {
-    setHabits((prev) => prev.map(h => h.id === id ? { ...h, done: !h.done } : h ))
+  async function toggleHabit(id) {
+    try {
+      const res = await fetch("/api/habits/habit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+
+      if (!res.ok) _handleError(await res.json());
+      else {
+        const updatedHabit = await res.json();
+        setHabits(prev => prev.map(h => h.id === id ? updatedHabit : h));
+      }
+    } catch(e) {
+      console.error("Something went wrong: ", e);
+    }
   }
 
   function deleteHabit(id) {
