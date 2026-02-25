@@ -62,16 +62,50 @@ function App() {
     }
   }
 
-  function deleteHabit(id) {
-    setHabits((prev) => prev.filter(h => h.id !== id));
+  async function deleteHabit(id) {
+    try {
+      const res = await fetch("/api/habits/habit", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+
+      if (!res.ok) _handleError(await res.json());
+      else {
+        const updatedHabits = await res.json();
+        setHabits(updatedHabits);
+      }
+    } catch(e) {
+      console.error("Something went wrong: ", e);
+    }
   }
 
-  function deleteAllDone() {
-    setHabits((prev) => prev.filter(h => !h.done));
+  async function deleteAllDone() {
+    try {
+      const res = await fetch("/api/habits/done", { method: "DELETE" });
+
+      if (!res.ok) _handleError(await res.json());
+      else {
+        const updatedHabits = await res.json();
+        setHabits(updatedHabits);
+      }
+    } catch(e) {
+      console.error("Something went wrong: ", e);
+    }
   }
 
-  function completeAllTodo() {
-    setHabits((prev) => prev.map(h => ({ ...h, done: true})));
+  async function completeAllTodo() {
+    try {
+      const res = await fetch("/api/habits/complete", { method: "PUT" });
+
+      if (!res.ok) _handleError(await res.json());
+      else {
+        const updatedHabits = await res.json();
+        setHabits(updatedHabits);
+      }
+    } catch(e) {
+      console.error("Something went wrong: ", e);
+    }
   }
 
   const todos = habits.filter(habit => !habit.done);

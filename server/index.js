@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 /* In-memory storage - next step to add sqlite or similar */
-const habits = [];
+let habits = [];
 
 function createHabit(name) {
   return {
@@ -45,6 +45,26 @@ app.put('/api/habits/habit', (req, res) => {
   habit.completedAt = Date.now();
 
   res.status(200).json(habit);
+});
+
+app.put('/api/habits/complete', (req, res) => {
+  habits = habits.map(h => ({...h, done: true}));
+  res.status(200).json(habits);
+});
+
+app.delete('/api/habits/habit', (req, res) => {
+  if (!req.body.id) return res.status(400).json({ error: "Empty" });
+
+  const habit = habits.find(h => h.id === req.body.id);
+  if (!habit) return res.status(404).json({ error: "Record Not Found" });
+
+  habits = habits.filter(h => h.id !== req.body.id);
+  res.status(200).json(habits);
+});
+
+app.delete('/api/habits/done', (req, res) => {
+  habits = habits.filter(h => h.done === false);
+  res.status(200).json(habits);
 });
 
 app.listen(PORT, () => {
