@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
@@ -6,32 +6,42 @@ function App() {
   const [habitInput, setHabitInput] = useState("");
   const [error, setError] = useState("");
 
-  // Factory
-  function _createHabit(name) {
-    return {
-      id: crypto.randomUUID(),
-      name,
-      done: false,
-      createdAt: Date.now(),
-      completedAt: null,
+  useEffect(() => {
+    async function loadHabits() {
+      const data = await fetch("/api/habits");
+      const storedHabits = await data.json();
+      setHabits(storedHabits);
     }
+    loadHabits()
+  }, []);
+
+  function _handleError(data) {
+    if (data.error.toLowerCase().includes("duplicate")) setError("You already have this habit!")
+    else setError("Something went wrong. Please try again.")
   }
 
-  function addHabit(e, newHabit) {
+  async function addHabit(e, newHabit) {
     e.preventDefault();
 
     if (newHabit.length === 0) return;
     const sanitizedInput = newHabit.trim().toLowerCase();
 
-    setHabits((prev) => {
-      if (prev.some(h => h.name === sanitizedInput)) {
-        setError("You already have this habit!");
-        return prev;
+    try {
+      const res = await fetch("/api/habits/habit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: sanitizedInput })
+      });
+      if (!res.ok) _handleError(await res.json());
+      else {
+        const createdHabit = await res.json();
+        setHabits(prev => [...prev, createdHabit]);
       }
-      return [...prev, _createHabit(sanitizedInput)]
-    });
-
-    setHabitInput("");
+    } catch(e) {
+      console.error("Something went wrong: ", e);
+    } finally {
+      setHabitInput("");
+    }
   }
 
   function toggleHabit(id) {
