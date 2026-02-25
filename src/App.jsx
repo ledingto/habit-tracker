@@ -9,6 +9,7 @@ function App() {
   // Factory
   function _createHabit(name) {
     return {
+      id: crypto.randomUUID(),
       name,
       done: false,
       createdAt: Date.now(),
@@ -33,12 +34,12 @@ function App() {
     setHabitInput("");
   }
 
-  function toggleHabit(name) {
-    setHabits((prev) => prev.map(h => h.name === name ? { ...h, done: !h.done } : h ))
+  function toggleHabit(id) {
+    setHabits((prev) => prev.map(h => h.id === id ? { ...h, done: !h.done } : h ))
   }
 
-  function deleteHabit(name) {
-    setHabits((prev) => prev.filter(h => h.name !== name));
+  function deleteHabit(id) {
+    setHabits((prev) => prev.filter(h => h.id !== id));
   }
 
   function deleteAllDone() {
@@ -67,9 +68,9 @@ function App() {
       <ul>
         { todos.map(habit => {
           return (
-            <li key={`${habit.name}`}>
+            <li key={`${habit.id}`}>
               <label>
-                <input type="checkbox" checked={habit.done} onChange={() => toggleHabit(habit.name)}/>
+                <input type="checkbox" checked={habit.done} onChange={() => toggleHabit(habit.id)}/>
                 {habit.name}
               </label>
             </li>
@@ -82,12 +83,12 @@ function App() {
       <ul>
         { dones.map(habit => {
           return (
-            <li key={`${habit.name}`}>
+            <li key={`${habit.id}`}>
               <label>
-                <input type="checkbox" checked={habit.done} onChange={() => toggleHabit(habit.name)}/>
+                <input type="checkbox" checked={habit.done} onChange={() => toggleHabit(habit.id)}/>
                 {habit.name}
               </label>
-              <button onClick={() => deleteHabit(habit.name)}>Delete</button>
+              <button onClick={() => deleteHabit(habit.id)}>Delete</button>
             </li>
           )
         })}
