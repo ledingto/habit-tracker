@@ -4,6 +4,7 @@ import './App.css'
 function App() {
   const [habits, setHabits] = useState([]);
   const [habitInput, setHabitInput] = useState("");
+  const [error, setError] = useState("");
 
   // Factory
   function _createHabit(name) {
@@ -22,9 +23,9 @@ function App() {
     const sanitizedInput = newHabit.trim().toLowerCase();
 
     setHabits((prev) => {
-      if (prev.filter(h => h.name === sanitizedInput).length) {
-        console.log("You already have this habit!")
-        return [...prev];
+      if (prev.some(h => h.name === sanitizedInput)) {
+        setError("You already have this habit!");
+        return prev;
       }
       return [...prev, _createHabit(sanitizedInput)]
     });
@@ -56,9 +57,10 @@ function App() {
       <h1>Track your Habits!</h1>
       <form onSubmit={(e) => addHabit(e, habitInput)}>
         <label htmlFor="add-habit">Add a habit: </label>
-        <input type="text" id="add-habit" value={habitInput} onChange={(e) => setHabitInput(e.target.value)}></input>
+        <input type="text" id="add-habit" value={habitInput} onChange={(e) => { setHabitInput(e.target.value); setError(""); }}></input>
         <input type="submit" disabled={!habitInput.length} />
       </form>
+      { error ?? <p>{error}</p>}
 
       <h2>To Do:</h2>
       <button onClick={() => completeAllTodo()} disabled={!todos.length}>Complete All To Dos</button>
